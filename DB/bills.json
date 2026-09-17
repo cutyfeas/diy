@@ -1,0 +1,65 @@
+[
+  {
+    "id": "7d4d73e5-3587-4560-b0ed-d9dead58bcf7",
+    "invoice_no": "001",
+    "date": "2026-09-18",
+    "customer_id": "4c1e980a-457c-4265-866c-fbdc17029372",
+    "order_id": "68e9c0bc-faa0-4132-a96e-993d5896f683",
+    "customer_name": "xx",
+    "items": [
+      {
+        "product_id": "24150b28-621a-4341-b151-3b3714d247f3",
+        "qty": 1,
+        "unit_price": 3.0,
+        "amount": 3.0
+      }
+    ],
+    "total": 3.0,
+    "notes": "",
+    "created_at": "2026-09-17T18:35:28.259385"
+  },
+  {
+    "id": "29ab1984-0cf8-444f-a2c5-dc9e86f232a9",
+    "invoice_no": "002",
+    "date": "2026-09-18",
+    "customer_id": "560b818d-8368-49e6-9094-4efd804433bb",
+    "order_id": "0ce56caa-acbb-400d-89fd-8204088951ae",
+    "customer_name": "test",
+    "items": [
+      {
+        "product_id": "24150b28-621a-4341-b151-3b3714d247f3",
+        "qty": 1,
+        "unit_price": 3.0,
+        "amount": 3.0
+      }
+    ],
+    "total": 3.0,
+    "notes": "",
+    "created_at": "2026-09-17T18:58:58.265280"
+  },
+  {
+    "id": "375e3087-d16d-42d9-8874-fe669b57b453",
+    "invoice_no": "003",
+    "date": "2026-09-18",
+    "customer_id": "4c1e980a-457c-4265-866c-fbdc17029372",
+    "order_id": "ec9e6771-35a8-435d-8378-4b6c65bfdbf3",
+    "customer_name": "xx",
+    "items": [
+      {
+        "product_id": "24150b28-621a-4341-b151-3b3714d247f3",
+        "qty": 1,
+        "unit_price": 3.0,
+        "amount": 3.0
+      },
+      {
+        "product_id": "16734740-62c7-4c08-918f-06831f896159",
+        "qty": 1000,
+        "unit_price": 4.0,
+        "amount": 4000.0
+      }
+    ],
+    "total": 4003.0,
+    "notes": "",
+    "created_at": "2026-09-17T18:59:26.734753"
+  }
+]

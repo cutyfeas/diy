@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <form action="/customers/edit/{{ customer.id }}" method="post" class="form-row">
+    <div class="form-group col-md-4">
+      <label>Name</label>
+      <input name="name" value="{{ customer.name }}" required class="form-control">
+    </div>
+    <div class="form-group col-md-3">
+      <label>Mobile</label>
+      <input name="mobile_number" value="{{ customer.mobile_number }}" required class="form-control">
+    </div>
+    <div class="form-group col-md-4">
+      <label>Address</label>
+      <input name="address" value="{{ customer.address }}" required class="form-control">
+    </div>
+    <div class="form-group col-md-1 align-self-end">
+      <button class="btn btn-primary w-100">Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

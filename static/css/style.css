@@ -1,0 +1,70 @@
+:root{
+  --bg:#F7F2EA;
+  --box:#F3E1DD;
+  --sage:#C9CFB8;
+  --accent1:#FF7F66; /* coral */
+  --accent2:#FFA94D; /* orange */
+  --accent3:#FFE066; /* yellow */
+  --accent4:#8FD3A8; /* teal */
+  --accent5:#66B2FF; /* blue */
+  --accent6:#C9A8FF; /* lavender */
+}
+*{box-sizing:border-box}
+body{font-family:Poppins, Arial, sans-serif;background:var(--bg);margin:0;color:#222}
+.site-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px}
+.logo{display:flex;flex-direction:column}
+.logo-main{font-family:'Baloo 2',sans-serif;font-size:32px}
+.logo-main .c1{color:var(--accent1)}.logo-main .c2{color:var(--accent2)}.logo-main .c3{color:var(--accent3)}.logo-main .c5{color:var(--accent4)}.logo-main .c6{color:var(--accent5)}.logo-main .c7{color:var(--accent6)}
+.studio{font-weight:700;letter-spacing:6px;margin-top:2px}
+.tag{font-size:14px;color:#444;margin-top:6px}
+.tag .heart{color:#e2556f}
+.main-nav a{margin:0 8px;padding:8px 12px;border-radius:999px;text-decoration:none;background:transparent}
+.container{padding:12px}
+.card{background:#fff;padding:12px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.05);margin-bottom:12px}
+.form-grid{display:flex;flex-wrap:wrap;gap:8px}
+.form-grid input, .form-grid select, .form-grid textarea{padding:10px;border-radius:8px;border:1px solid #eee;flex:1 1 200px}
+.btn{padding:10px 14px;border-radius:999px;border:none;background:var(--sage);cursor:pointer}
+.btn.primary{background:var(--accent4);color:#fff}
+.btn.danger{background:#f6b0a9;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.product-card{background:var(--box);padding:10px;border-radius:10px;text-align:center}
+.product-card img{width:100%;height:150px;object-fit:cover;border-radius:8px}
+.placeholder{height:150px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px}
+.pname{font-weight:600;margin-top:8px}
+.price{color:#333}
+.deleted{opacity:0.6;position:relative}
+.product-card{position:relative;overflow:hidden}
+.sold-ribbon{position:absolute;left:-40px;top:12px;background:#e74c3c;color:#fff;transform:rotate(-25deg);padding:8px 80px;font-weight:800;box-shadow:0 6px 12px rgba(0,0,0,0.18);border-radius:6px;font-size:14px;text-transform:uppercase;letter-spacing:2px;z-index:20}
+.sold-ribbon span{display:inline-block}
+.sold-overlay{position:absolute;inset:0;background:linear-gradient(180deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.75) 70%);display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px;font-weight:700;color:#c0392b;font-size:16px;z-index:10;border-radius:10px}
+
+/* Cart badge */
+.cart-badge{position:absolute;top:-6px;right:-6px;background:#dc3545;color:#fff;font-size:11px;padding:2px 6px;border-radius:999px;z-index:30;box-shadow:0 2px 6px rgba(0,0,0,0.15)}
+.responsive-table{width:100%;border-collapse:collapse}
+.responsive-table th,.responsive-table td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.toasts{position:fixed;right:16px;top:16px;z-index:200}
+.toast{background:#fff;padding:10px;border-radius:8px;margin-bottom:6px;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.toast.error{border-left:4px solid #e74c3c}
+.toast.success{border-left:4px solid #2ecc71}
+
+/* Invoice styles */
+.invoice{background:#fff;padding:20px;border-radius:12px}
+.inv-header{display:flex;justify-content:space-between;align-items:center}
+.inv-title{font-family:serif;font-size:36px}
+.bill-to{background:var(--box);padding:12px;border-radius:8px;margin:12px 0}
+.inv-table{width:100%;border-collapse:collapse}
+.inv-table th,.inv-table td{padding:8px;border-bottom:1px solid #f0e6e3}
+.inv-table thead{background:var(--box)}
+.total-row{font-weight:700;background:#fdecec}
+.notes{margin-top:12px}
+
+/* Sticky footer */
+.main-content{padding-bottom:120px}
+.site-footer{position:fixed;left:0;right:0;bottom:0;z-index:1000;background:#fff;border-top:1px solid #eee}
+.site-footer .container{padding-top:12px;padding-bottom:12px}
+
+@media(max-width:600px){
+  .logo-main{font-size:24px}
+  .form-grid{flex-direction:column}
+  .grid{grid-template-columns:repeat(2,1fr)}
+}

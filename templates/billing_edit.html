@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mb-3 h4">Edit Invoice {{ bill.invoice_no }}</div>
+<form action="/billing/edit/{{ bill.id }}" method="post">
+  <div class="form-group">
+    <label>Customer</label>
+    <select name="customer_id" class="form-control">
+      {% for c in customers %}
+        <option value="{{ c.id }}" {% if c.id==bill.customer_id %}selected{% endif %}>{{ c.name }} — {{ c.mobile_number }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="items">
+    {% for i, it in enumerate(bill['items']) %}
+    <div class="form-row item-row align-items-center mb-2">
+      <div class="form-group col-md-4">
+        <select name="item_product_{{ i }}" class="product-pick form-control">
+          <option value="">-- product --</option>
+          {% for p in products %}
+            <option value="{{ p.id }}" data-price="{{ p.price }}" {% if p.id==it.product_id %}selected{% endif %}>{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+        <div class="form-group col-md-1">
+          <input name="item_qty_{{ i }}" value="{{ it.qty }}" type="number" min="1" class="form-control">
+        </div>
+        <div class="col-md-2 amount">₹{{ '%.2f'|format(it.unit_price) }}</div>
+        <div class="col-md-2 amount">₹{{ '%.2f'|format(it.amount) }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="mb-2">
+    <button type="button" class="btn btn-secondary" onclick="addRow()">Add Row</button>
+  </div>
+  
+  <button class="btn btn-primary">Save</button>
+</form>
+{% endblock %}

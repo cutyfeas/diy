@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="h4 mb-0">Your Cart</div>
+  <a class="btn btn-outline-secondary" href="/dashboard">Continue Shopping</a>
+</div>
+
+<section class="card">
+  {% if items %}
+    <table class="responsive-table">
+      <thead><tr><th>Product</th><th>Qty</th><th>Price (₹)</th><th>Subtotal</th><th></th></tr></thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td>{{ it.product.name }}</td>
+          <td>{{ it.quantity }}</td>
+          <td>₹{{ '%.2f'|format(it.product.price) }}</td>
+          <td>₹{{ '%.2f'|format(it.subtotal) }}</td>
+          <td><button class="btn btn-sm btn-outline-danger" onclick="removeFromCart('{{ it.product.id }}')">Remove</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+      <div></div>
+      <div class="h5">Total: ₹{{ '%.2f'|format(total) }}</div>
+    </div>
+
+    <form action="/cart/place" method="post">
+      <div class="form-row">
+        <div class="form-group col-md-4">
+          <label>Name</label>
+          <input name="name" class="form-control" required>
+        </div>
+        <div class="form-group col-md-3">
+          <label>Mobile</label>
+          <input name="mobile" class="form-control" required>
+        </div>
+        <div class="form-group col-md-5">
+          <label>Address</label>
+          <input name="address" class="form-control">
+        </div>
+      </div>
+      <button class="btn btn-primary">Place Order</button>
+    </form>
+  {% else %}
+    <div>Your cart is empty.</div>
+  {% endif %}
+</section>
+
+{% endblock %}

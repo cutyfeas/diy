@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card">
+  <form action="/customers/add" method="post" class="form-row align-items-end">
+    <div class="form-group col-md-4">
+      <input name="name" placeholder="Full name" required class="form-control">
+    </div>
+    <div class="form-group col-md-3">
+      <input name="mobile_number" placeholder="10-digit mobile" required class="form-control">
+    </div>
+    <div class="form-group col-md-4">
+      <input name="address" placeholder="Address" required class="form-control">
+    </div>
+    <div class="form-group col-md-1">
+      <button class="btn btn-primary w-100">Add</button>
+    </div>
+  </form>
+</section>
+
+<section class="card mt-3">
+  <h2>All customers</h2>
+  <input id="cust-search" placeholder="Search by name or mobile" oninput="filterCustomers()" class="form-control mb-2">
+  <table class="responsive-table">
+    <thead><tr><th>Name</th><th>Mobile</th><th>Address</th><th>Actions</th></tr></thead>
+    <tbody id="cust-list">
+      {% for c in customers %}
+      <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.mobile_number }}</td>
+        <td>{{ c.address }}</td>
+        <td>
+          <a class="btn btn-sm btn-outline-secondary mr-1" href="/customers/edit/{{ c.id }}">Edit</a>
+          <form action="/customers/delete/{{ c.id }}" method="post" style="display:inline-block">
+            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="h4 mb-0">Orders Received</div>
+  <a class="btn btn-primary" href="/orders/add">Add Order</a>
+</div>
+
+<section class="card">
+  <table class="responsive-table">
+    <thead><tr><th>Date</th><th>Customer</th><th>Total (₹)</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>{{ o.created_at_fmt }}</td>
+        <td>{{ o.customer_name }}<br><small>{{ o.customer_mobile }}</small></td>
+        <td>₹{{ '%.2f'|format(o.total) }}</td>
+        <td>
+          {% if o.get('bill_id') and o._bill %}
+            <span class="badge badge-success">{{ o._bill.invoice_no }}</span>
+          {% else %}
+            <form action="/orders/create_bill/{{ o.id }}" method="post" style="display:inline-block;margin-right:6px">
+              <button class="btn btn-sm btn-primary">Create Bill</button>
+            </form>
+            <form action="/orders/delete/{{ o.id }}" method="post" style="display:inline-block" onsubmit="return confirm('Delete order?')">
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+
+      {# Modals removed — details are prepared server-side; when billed an invoice badge is shown and actions removed. #}
+
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DIY HUE STUDIO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=Poppins:wght@300;400;600&family=Caveat&display=swap" rel="stylesheet">
+  <!-- Local Bootstrap CSS -->
+  <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <div class="logo">
+          <div class="logo-main mb-0">
+            <span class="c1">D</span><span class="c2">I</span><span class="c3">Y</span>
+            <span class="c5">H</span><span class="c6">U</span><span class="c7">E</span>
+          </div>
+          <div class="studio">STUDIO</div>
+        </div>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item"><a class="nav-link {% if request.path == '/' or request.path.startswith('/dashboard') %}active{% endif %}" href="/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.path.startswith('/customers') %}active{% endif %}" href="/customers">Customers</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.path.startswith('/products') %}active{% endif %}" href="/products">Products</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.path.startswith('/orders') %}active{% endif %}" href="/orders">Orders</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.path.startswith('/billing') or request.path.startswith('/invoice') %}active{% endif %}" href="/billing">Billing</a></li>
+        </ul>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+          <a class="btn btn-outline-secondary my-2 my-sm-0 mr-2 position-relative" href="/cart" aria-label="Cart">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1 .485.379L2.89 5H14.5a.5.5 0 0 1 .49.598l-1.5 6A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.49-.402L1.01 2H.5a.5.5 0 0 1-.5-.5zM5.5 12a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm7 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+            </svg>
+            <span id="cart-count" class="cart-badge" style="display:none">0</span>
+          </a>
+          <a class="btn btn-outline-primary my-2 my-sm-0" href="#">Login</a>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <div class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div>
+          {% for category, msg in messages %}
+            <div class="alert {% if category=='error' %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show" role="alert">
+              {{ msg }}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}
+    <section class="stats row">
+      <div class="col-sm-3 stat">Customers: {{ stats.customers }}</div>
+      <div class="col-sm-3 stat">Products: {{ stats.products }}</div>
+      <div class="col-sm-3 stat">Bills: {{ stats.bills }}</div>
+      <div class="col-sm-3 stat">Revenue: ₹{{ stats.revenue }}</div>
+    </section>
+    {% endblock %}
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div class="motto">Pick. Paint. Create 🦋</div>
+      <div class="text-right">
+        <a href="https://www.instagram.com/diyhuestudio/" target="_blank"><img src="/static/vendor/instagram.svg" alt="ig" style="height:20px;vertical-align:middle;margin-right:6px"></a>
+        <a href="mailto:diyhuestudio@gmail.com">diyhuestudio@gmail.com</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Local vendor scripts: jQuery, Popper, Bootstrap, then app script -->
+  <script src="/static/vendor/jquery/jquery.min.js"></script>
+  <script src="/static/vendor/popper/popper.min.js"></script>
+  <script src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/static/js/script.js"></script>
+</body>
+</html>

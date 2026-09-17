@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="h4 mb-0">Add Order</div>
+  <a class="btn btn-outline-secondary" href="/orders">Back to Orders</a>
+</div>
+
+<form action="/orders/add" method="post" id="orderForm">
+  <div class="form-group">
+    <label>Customer</label>
+    <select name="customer_id" id="customerSelect" class="form-control">
+      <option value="">-- Select customer --</option>
+      {% for c in customers %}
+        <option value="{{ c.id }}">{{ c.name }} - {{ c.mobile_number }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="items">
+    <div class="form-row item-row align-items-center mb-2">
+      <div class="form-group col-md-5">
+        <select name="item_product_0" class="product-pick form-control">
+          <option value="">-- product --</option>
+          {% for p in products %}
+            <option value="{{ p.id }}" data-price="{{ p.price }}">{{ p.name }} - {{ '%.2f'|format(p.price) }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group col-md-2">
+        <input name="item_qty_0" value="1" type="number" min="1" class="form-control qty-input">
+      </div>
+      <div class="col-md-2 unit-price">₹0.00</div>
+      <div class="col-md-2 amount">₹0.00</div>
+      <!-- first row has no remove button -->
+    </div>
+  </div>
+
+  <template id="itemTemplate">
+    <div class="form-row item-row align-items-center mb-2">
+      <div class="form-group col-md-5">
+        <select class="product-pick form-control">
+          <option value="">-- product --</option>
+          {% for p in products %}
+            <option value="{{ p.id }}" data-price="{{ p.price }}">{{ p.name }} - {{ '%.2f'|format(p.price) }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group col-md-2">
+        <input value="1" type="number" min="1" class="form-control qty-input">
+      </div>
+      <div class="col-md-2 unit-price">₹0.00</div>
+      <div class="col-md-2 amount">₹0.00</div>
+      <div class="col-md-1"><button type="button" class="btn btn-outline-danger btn-sm remove-row">🗑️</button></div>
+    </div>
+  </template>
+
+  <div class="mb-2">
+    <button type="button" id="addRow" class="btn btn-secondary">Add product</button>
+  </div>
+
+  <div class="d-flex justify-content-end mb-3">
+    <div class="mr-3">Total: <strong id="orderTotal">₹0.00</strong></div>
+    <button class="btn btn-primary">Create Order</button>
+  </div>
+</form>
+
+<script>
+document.getElementById('addRow').addEventListener('click', function(){
+  const idx = document.querySelectorAll('#items .item-row').length;
+  const tpl = document.getElementById('itemTemplate');
+  const clone = tpl.content.cloneNode(true);
+  // set names for product and qty inputs
+  const newRow = clone.querySelector('.item-row');
+  const sel = clone.querySelector('.product-pick');
+  const qty = clone.querySelector('.qty-input');
+  if(sel) sel.name = 'item_product_' + idx;
+  if(qty) qty.name = 'item_qty_' + idx;
+  document.getElementById('items').appendChild(clone);
+  const appended = document.querySelectorAll('#items .item-row')[idx];
+  bindRow(appended);
+  recalcTotal();
+  updateSubmitState();
+});
+
+function bindRow(row){
+  const select = row.querySelector('.product-pick');
+  const qty = row.querySelector('.qty-input');
+  const removeBtn = row.querySelector('.remove-row');
+
+  function updateRow(){
+    const price = parseFloat(select.selectedOptions[0]?.dataset.price || 0) || 0;
+    row.querySelector('.unit-price').textContent = '₹'+price.toFixed(2);
+    const q = parseInt(qty.value || 0) || 0;
+    row.querySelector('.amount').textContent = '₹'+(price * q).toFixed(2);
+    recalcTotal();
+    updateSubmitState();
+  }
+
+  select.addEventListener('change', updateRow);
+  qty.addEventListener('input', updateRow);
+  if(removeBtn){
+    removeBtn.addEventListener('click', function(){
+    // prevent removing the last remaining row
+    const rows = document.querySelectorAll('#items .item-row');
+    if(rows.length <= 1){
+      alert('At least one product row is required.');
+      return;
+    }
+    // remove only this row
+    row.remove();
+    recalcTotal();
+    updateSubmitState();
+    });
+  }
+}
+
+// bind existing rows on load
+document.querySelectorAll('#items .item-row').forEach(r=>bindRow(r));
+
+function updateSubmitState(){
+  const cust = document.getElementById('customerSelect').value;
+  let hasProduct=false;
+  document.querySelectorAll('#items .item-row').forEach(r=>{
+    const sel = r.querySelector('.product-pick');
+    if(sel && sel.value) hasProduct = true;
+  });
+  const submitBtn = document.querySelector('form#orderForm button[type="submit"]') || document.querySelector('form#orderForm .btn-primary');
+  if(submitBtn){
+    if(cust && hasProduct) submitBtn.disabled = false; else submitBtn.disabled = true;
+  }
+}
+
+document.getElementById('customerSelect').addEventListener('change', updateSubmitState);
+
+function recalcTotal(){
+  let total=0;
+  document.querySelectorAll('#items .item-row').forEach(r=>{
+    const amtText = r.querySelector('.amount').textContent.replace('₹','')||'0';
+    total += parseFloat(amtText);
+  });
+  document.getElementById('orderTotal').textContent = '₹'+total.toFixed(2);
+}
+
+// initialize totals and submit state
+recalcTotal();
+updateSubmitState();
+</script>
+
+<script>
+// client-side validation: require customer and at least one product selected
+document.getElementById('orderForm').addEventListener('submit', function(e){
+  const cust = document.getElementById('customerSelect').value;
+  if(!cust){
+    e.preventDefault();
+    alert('Please select a customer.');
+    return;
+  }
+  let hasProduct=false;
+  document.querySelectorAll('.product-pick').forEach(s=>{ if(s.value) hasProduct=true; });
+  if(!hasProduct){
+    e.preventDefault();
+    alert('Please add at least one product to the order.');
+    return;
+  }
+});
+</script>
+</script>
+
+{% endblock %}
