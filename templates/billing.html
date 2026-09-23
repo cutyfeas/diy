@@ -22,7 +22,7 @@
     {% set wa_text = 'DIY HUE Studio\nPick • Paint • Create\n\nHello ' ~ b.customer_name ~ ',\n\nThank you for shopping with DIY HUE Studio!\nYour invoice is available here:\n' ~ invoice_url ~ '\n\n✨ Handmade with love, always ✨' %}
     {% set wa_link = 'https://wa.me/' ~ wa_mobile ~ '?text=' ~ wa_text|urlencode %}
     <button type="button" class="btn btn-sm btn-success whatsapp-invoice-btn" data-wa-link="{{ wa_link }}">WhatsApp Invoice</button>
-{% endif %}git push
+{% endif %}
 
 
           
