@@ -1,1 +1,21 @@
-[]
+[
+  {
+    "id": "c3da6db7-5a62-4ada-97a5-0fc65e5ab963",
+    "invoice_no": "001",
+    "date": "2026-09-24",
+    "customer_id": "fb450b03-2505-4a1c-904c-8889afcfbd89",
+    "order_id": "49a9cb9c-009d-4857-bebe-f405110c2d85",
+    "customer_name": "sfsfs",
+    "items": [
+      {
+        "product_id": "ac56438b-cba9-4307-a338-b89cf98d7c20",
+        "qty": 1,
+        "unit_price": 149.0,
+        "amount": 149.0
+      }
+    ],
+    "total": 149.0,
+    "notes": "",
+    "created_at": "2026-09-23T20:55:50.848875"
+  }
+]
