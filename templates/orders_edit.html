@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="h4 mb-0">Edit Order</div>
+  <a class="btn btn-outline-secondary" href="/orders">Back to Orders</a>
+</div>
+
+<form action="/orders/edit/{{ order.id }}" method="post" id="orderEditForm">
+  <div class="form-group">
+    <label>Customer</label>
+    <select name="customer_id" id="customerSelect" class="form-control">
+      <option value="">-- Select customer --</option>
+      {% for c in customers %}
+        <option value="{{ c.id }}" {% if c.id == order.customer_id %}selected{% endif %}>{{ c.name }} - {{ c.mobile_number }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="items">
+    {% for item in order['items'] %}
+    {% set idx = loop.index0 %}
+    <div class="form-row item-row align-items-center mb-2">
+      <div class="form-group col-md-5">
+        <select name="item_product_{{ idx }}" class="product-pick form-control">
+          <option value="">-- product --</option>
+          {% for p in products %}
+            {% if not p.is_deleted or p.id == item.product_id %}
+              <option value="{{ p.id }}" data-price="{{ p.price }}" {% if p.id == item.product_id %}selected{% endif %}>{{ p.name }} - {{ '%.2f'|format(p.price) }}{% if p.is_deleted %} (Deleted){% endif %}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group col-md-2">
+        <input name="item_qty_{{ idx }}" value="{{ item.qty }}" type="number" min="1" class="form-control qty-input">
+      </div>
+      <div class="col-md-2 unit-price">₹{{ '%.2f'|format(item.unit_price) }}</div>
+      <div class="col-md-2 amount">₹{{ '%.2f'|format(item.amount) }}</div>
+      <div class="col-md-1">
+        <button type="button" class="btn btn-outline-danger btn-sm remove-row">🗑️</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <template id="itemTemplate">
+    <div class="form-row item-row align-items-center mb-2">
+      <div class="form-group col-md-5">
+        <select class="product-pick form-control">
+          <option value="">-- product --</option>
+          {% for p in products %}
+            {% if not p.is_deleted %}
+              <option value="{{ p.id }}" data-price="{{ p.price }}">{{ p.name }} - {{ '%.2f'|format(p.price) }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group col-md-2">
+        <input value="1" type="number" min="1" class="form-control qty-input">
+      </div>
+      <div class="col-md-2 unit-price">₹0.00</div>
+      <div class="col-md-2 amount">₹0.00</div>
+      <div class="col-md-1"><button type="button" class="btn btn-outline-danger btn-sm remove-row">🗑️</button></div>
+    </div>
+  </template>
+
+  <div class="mb-2">
+    <button type="button" id="addRow" class="btn btn-secondary">Add product</button>
+  </div>
+
+  <div class="d-flex justify-content-end mb-3">
+    <div class="mr-3">Total: <strong id="orderTotal">₹{{ '%.2f'|format(order.total) }}</strong></div>
+    <button class="btn btn-primary">Save Order</button>
+  </div>
+</form>
+
+<script>
+function bindRow(row){
+  const select = row.querySelector('.product-pick');
+  const qty = row.querySelector('.qty-input');
+  const removeBtn = row.querySelector('.remove-row');
+
+  function updateRow(){
+    const price = parseFloat(select.selectedOptions[0]?.dataset.price || 0) || 0;
+    row.querySelector('.unit-price').textContent = '₹' + price.toFixed(2);
+    const q = parseInt(qty.value || 0) || 0;
+    row.querySelector('.amount').textContent = '₹' + (price * q).toFixed(2);
+    recalcTotal();
+    updateSubmitState();
+  }
+
+  if(select) select.addEventListener('change', updateRow);
+  if(qty) qty.addEventListener('input', updateRow);
+  if(removeBtn){
+    removeBtn.addEventListener('click', function(){
+      const rows = document.querySelectorAll('#items .item-row');
+      if(rows.length <= 1){
+        alert('At least one product row is required.');
+        return;
+      }
+      row.remove();
+      recalcTotal();
+      updateSubmitState();
+    });
+  }
+}
+
+document.querySelectorAll('#items .item-row').forEach(r => bindRow(r));
+
+function recalcTotal(){
+  let total = 0;
+  document.querySelectorAll('#items .item-row').forEach(r => {
+    const value = r.querySelector('.amount')?.textContent || '₹0.00';
+    total += parseFloat(value.replace('₹', '')) || 0;
+  });
+  document.getElementById('orderTotal').textContent = '₹' + total.toFixed(2);
+}
+
+function updateSubmitState(){
+  const cust = document.getElementById('customerSelect').value;
+  let hasProduct = false;
+  document.querySelectorAll('#items .item-row').forEach(r => {
+    const sel = r.querySelector('.product-pick');
+    if(sel && sel.value) hasProduct = true;
+  });
+  const submitBtn = document.querySelector('#orderEditForm button[type="submit"]');
+  if(submitBtn){
+    submitBtn.disabled = !(cust && hasProduct);
+  }
+}
+
+const addBtn = document.getElementById('addRow');
+if(addBtn){
+  addBtn.addEventListener('click', function(){
+    const idx = document.querySelectorAll('#items .item-row').length;
+    const tpl = document.getElementById('itemTemplate');
+    const clone = tpl.content.cloneNode(true);
+    const row = clone.querySelector('.item-row');
+    const sel = clone.querySelector('.product-pick');
+    const qty = clone.querySelector('.qty-input');
+    sel.name = 'item_product_' + idx;
+    qty.name = 'item_qty_' + idx;
+    document.getElementById('items').appendChild(clone);
+    bindRow(row);
+    recalcTotal();
+    updateSubmitState();
+  });
+}
+
+document.getElementById('customerSelect').addEventListener('change', updateSubmitState);
+recalcTotal();
+updateSubmitState();
+
+// final client-side validation
+document.getElementById('orderEditForm').addEventListener('submit', function(e){
+  const cust = document.getElementById('customerSelect').value;
+  if(!cust){
+    e.preventDefault();
+    alert('Please select a customer.');
+    return;
+  }
+  let hasProduct = false;
+  document.querySelectorAll('.product-pick').forEach(s => { if(s.value) hasProduct = true; });
+  if(!hasProduct){
+    e.preventDefault();
+    alert('Please add at least one product to the order.');
+  }
+});
+</script>
+{% endblock %}

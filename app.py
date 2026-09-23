@@ -1,18 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, session
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, send_file, session
 import uuid
 import json
 from pathlib import Path
 import datetime
 import os
+import io
 from werkzeug.utils import secure_filename
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 BASE_DIR = Path(__file__).parent
 DB_DIR = BASE_DIR / 'DB'
 UPLOAD_DIR = BASE_DIR / 'static' / 'uploads'
 ALLOWED_EXT = {'png', 'jpg', 'jpeg'}
+WHATSAPP_BILL_DIR = UPLOAD_DIR / 'whatsapp_bills'
+WHATSAPP_INVOICE_DIR = UPLOAD_DIR / 'invoice_whatsapp'
 
-for d in (DB_DIR, UPLOAD_DIR):
+for d in (DB_DIR, UPLOAD_DIR, WHATSAPP_BILL_DIR, WHATSAPP_INVOICE_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -48,6 +51,136 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
 
+def generate_whatsapp_bill_image(order):
+    """Create a PNG bill image using the order data so WhatsApp can share it."""
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except Exception:
+        return None
+
+    customer_name = (order or {}).get('customer_name', 'Customer')
+    total = float((order or {}).get('total', 0) or 0)
+    invoice_no = (order or {}).get('invoice_no') or (order or {}).get('id', '')[:8].upper()
+    items = (order or {}).get('items', []) or []
+
+    width, height = 900, 1200
+    bg = (255, 255, 255)
+    accent = (37, 99, 235)
+    dark = (24, 24, 27)
+    soft = (90, 90, 90)
+    border = (230, 230, 230)
+    img = Image.new('RGB', (width, height), bg)
+    draw = ImageDraw.Draw(img)
+
+    margin = 40
+    y = margin
+    draw.rounded_rectangle([(margin, margin), (width - margin, height - margin)], radius=26, fill=(255, 255, 255), outline=border, width=3)
+
+    try:
+        title_font = ImageFont.truetype('arial.ttf', 30)
+        body_font = ImageFont.truetype('arial.ttf', 22)
+        small_font = ImageFont.truetype('arial.ttf', 18)
+    except Exception:
+        title_font = ImageFont.load_default()
+        body_font = ImageFont.load_default()
+        small_font = ImageFont.load_default()
+
+    draw.rectangle([(margin + 18, margin + 16), (width - margin - 18, margin + 90)], fill=accent)
+    draw.text((margin + 32, margin + 28), 'DIY HUE Studio', fill=(255, 255, 255), font=title_font)
+
+    y = margin + 120
+    draw.text((margin + 24, y), f'Bill for: {customer_name}', fill=dark, font=body_font)
+    y += 42
+    draw.text((margin + 24, y), f'Invoice No: {invoice_no}', fill=soft, font=small_font)
+    y += 44
+    draw.text((margin + 24, y), 'Item', fill=soft, font=small_font)
+    draw.text((width - 200, y), 'Amount', fill=soft, font=small_font)
+
+    y += 28
+    line_y = y
+    draw.line([(margin + 24, line_y), (width - margin - 24, line_y)], fill=border, width=2)
+    y += 18
+
+    for it in items:
+        item_name = str(it.get('product_name') or it.get('product_id') or 'Item')
+        qty = it.get('qty', 1)
+        amount = float(it.get('amount', 0) or 0)
+        draw.text((margin + 24, y), f'{item_name} x {qty}', fill=dark, font=small_font)
+        draw.text((width - 200, y), f'₹{amount:.2f}', fill=dark, font=small_font)
+        y += 30
+
+    y += 20
+    draw.line([(margin + 24, y), (width - margin - 24, y)], fill=border, width=2)
+    y += 24
+    draw.text((margin + 24, y), 'Total', fill=dark, font=body_font)
+    draw.text((width - 200, y), f'₹{total:.2f}', fill=accent, font=body_font)
+    y += 54
+    draw.text((margin + 24, y), 'Thank you for choosing DIY HUE Studio!', fill=soft, font=small_font)
+
+    image_name = f"whatsapp_bill_{uuid.uuid4().hex}.png"
+    image_path = WHATSAPP_BILL_DIR / image_name
+    img.save(image_path, format='PNG')
+    return f'/static/uploads/whatsapp_bills/{image_name}'
+
+
+def generate_invoice_whatsapp_image(bill):
+    """Create a PNG invoice image named with the invoice number and save it locally."""
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except Exception:
+        return None
+
+    customer_name = bill.get('customer_name', 'Customer')
+    invoice_no = bill.get('invoice_no', '000')
+    items = bill.get('items', []) or []
+    total = float(bill.get('total', 0) or 0)
+
+    width, height = 900, 1200
+    bg = (255, 255, 255)
+    accent = (98, 58, 150)
+    dark = (20, 20, 20)
+    soft = (88, 88, 88)
+    border = (230, 230, 230)
+    img = Image.new('RGB', (width, height), bg)
+    draw = ImageDraw.Draw(img)
+    margin = 50
+
+    draw.rounded_rectangle([(margin, margin), (width - margin, height - margin)], radius=24, outline=border, width=3, fill=(255, 255, 255))
+    draw.rectangle([(margin + 15, margin + 15), (width - margin - 15, margin + 90)], fill=accent)
+    draw.text((margin + 30, margin + 30), 'DIY HUE Studio', fill=(255, 255, 255), font=ImageFont.truetype('arial.ttf', 28))
+    draw.text((margin + 30, margin + 110), f'Invoice: {invoice_no}', fill=dark, font=ImageFont.truetype('arial.ttf', 22))
+    draw.text((margin + 30, margin + 150), f'Customer: {customer_name}', fill=soft, font=ImageFont.truetype('arial.ttf', 20))
+    draw.text((margin + 30, margin + 185), f'Date: {bill.get("date", "")}', fill=soft, font=ImageFont.truetype('arial.ttf', 18))
+
+    y = margin + 240
+    draw.text((margin + 30, y), 'Item', fill=soft, font=ImageFont.truetype('arial.ttf', 18))
+    draw.text((width - 180, y), 'Amount', fill=soft, font=ImageFont.truetype('arial.ttf', 18))
+    y += 24
+    draw.line([(margin + 30, y), (width - margin - 30, y)], fill=border, width=2)
+    y += 20
+
+    for it in items:
+        item_name = str(it.get('product_name') or it.get('product_id') or 'Item')
+        amount = float(it.get('amount', 0) or 0)
+        qty = it.get('qty', 1)
+        draw.text((margin + 30, y), f'{item_name} x {qty}', fill=dark, font=ImageFont.truetype('arial.ttf', 18))
+        draw.text((width - 180, y), f'₹{amount:.2f}', fill=dark, font=ImageFont.truetype('arial.ttf', 18))
+        y += 28
+
+    y += 16
+    draw.line([(margin + 30, y), (width - margin - 30, y)], fill=border, width=2)
+    y += 30
+    draw.text((margin + 30, y), 'Total', fill=dark, font=ImageFont.truetype('arial.ttf', 22))
+    draw.text((width - 180, y), f'₹{total:.2f}', fill=accent, font=ImageFont.truetype('arial.ttf', 22))
+    y += 80
+    draw.text((margin + 30, y), 'Thanks for buying from DIY HUE Studio.', fill=soft, font=ImageFont.truetype('arial.ttf', 18))
+
+    image_name = f"invoice_{invoice_no}.png"
+    image_path = WHATSAPP_INVOICE_DIR / image_name
+    img.save(image_path, format='PNG')
+    return f'/static/uploads/invoice_whatsapp/{image_name}'
+
+
 def make_thumbnail(src_path: Path, dest_path: Path, size=(400, 400)):
     try:
         img = Image.open(src_path)
@@ -61,10 +194,34 @@ def make_thumbnail(src_path: Path, dest_path: Path, size=(400, 400)):
 
 app = Flask(__name__)
 app.secret_key = 'dev-key-diy-hue'
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'admin'
 
 
 @app.route('/')
 def index():
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['is_admin'] = True
+            session['admin_username'] = username
+            flash('Logged in successfully', 'success')
+            return redirect(url_for('dashboard'))
+        flash('Invalid username or password', 'error')
+    return render_template('login.html')
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('is_admin', None)
+    session.pop('admin_username', None)
+    flash('Logged out successfully', 'success')
     return redirect(url_for('dashboard'))
 
 
@@ -280,10 +437,11 @@ def next_invoice_no():
 def bills_list():
     bills = read_json(BILLS_FILE)
     customers = read_json(CUSTOMERS_FILE)
-    # attach customer name for display
-    cust_map = {c['id']: c.get('name', '') for c in customers}
+    cust_map = {c['id']: c for c in customers}
     for b in bills:
-        b['customer_name'] = cust_map.get(b.get('customer_id'), b.get('customer_id'))
+        customer = cust_map.get(b.get('customer_id'))
+        b['customer_name'] = customer.get('name', b.get('customer_name', b.get('customer_id'))) if customer else b.get('customer_name', b.get('customer_id'))
+        b['customer_mobile'] = customer.get('mobile_number', '') if customer else ''
     return render_template('billing.html', bills=bills)
 
 
@@ -438,6 +596,75 @@ def orders_add():
     return redirect(url_for('orders_list'))
 
 
+@app.route('/orders/edit/<id>', methods=['GET', 'POST'])
+def orders_edit(id):
+    orders = read_json(ORDERS_FILE)
+    order = next((o for o in orders if o['id'] == id), None)
+    if not order:
+        flash('Order not found', 'error')
+        return redirect(url_for('orders_list'))
+    if order.get('bill_id'):
+        flash('This order already has a bill and cannot be edited.', 'error')
+        return redirect(url_for('orders_list'))
+
+    customers = read_json(CUSTOMERS_FILE)
+    products = read_json(PRODUCTS_FILE)
+
+    if request.method == 'GET':
+        return render_template('orders_edit.html', order=order, customers=customers, products=products)
+
+    data = request.form
+    cust_id = data.get('customer_id')
+    cust = next((c for c in customers if c['id'] == cust_id), None)
+    if not cust_id or not cust:
+        flash('Please select a valid customer.', 'error')
+        return redirect(url_for('orders_edit', id=id))
+
+    items = []
+    idx = 0
+    total = 0
+    while True:
+        pid = data.get(f'item_product_{idx}')
+        if not pid:
+            break
+        qty = int(data.get(f'item_qty_{idx}', '1'))
+        if qty <= 0:
+            qty = 1
+        prod = next((p for p in products if p['id'] == pid), None)
+        if not prod:
+            idx += 1
+            continue
+        price = float(prod.get('price', 0))
+        amount = qty * price
+        items.append({
+            'product_id': prod['id'],
+            'product_name': prod.get('name', ''),
+            'qty': qty,
+            'unit_price': price,
+            'amount': amount,
+        })
+        total += amount
+        idx += 1
+
+    if not items:
+        flash('Please add at least one product to the order.', 'error')
+        return redirect(url_for('orders_edit', id=id))
+
+    order['customer_id'] = cust['id']
+    order['customer_name'] = cust.get('name', '')
+    order['customer_mobile'] = cust.get('mobile_number', '')
+    order['customer_address'] = cust.get('address', '')
+    order['items'] = items
+    order['total'] = total
+    order['updated_at'] = now_iso()
+    order['orderid'] = order['id']
+    order['customerid'] = order['customer_id']
+
+    write_json_atomic(ORDERS_FILE, orders)
+    flash('Order updated', 'success')
+    return redirect(url_for('orders_list'))
+
+
 @app.route('/orders/delete/<id>', methods=['POST'])
 def orders_delete(id):
     orders = read_json(ORDERS_FILE)
@@ -495,6 +722,47 @@ def orders_create_bill(id):
     write_json_atomic(ORDERS_FILE, orders)
     flash('Bill created from order', 'success')
     return redirect(url_for('orders_list'))
+
+
+@app.route('/orders/whatsapp-image/<id>')
+def whatsapp_bill_image(id):
+    orders = read_json(ORDERS_FILE)
+    order = next((o for o in orders if o['id'] == id), None)
+    if not order:
+        return '', 404
+
+    order_copy = dict(order)
+    order_copy['invoice_no'] = order.get('bill_id') or order.get('id', '')[:8].upper()
+    image_path = generate_whatsapp_bill_image(order_copy)
+    if not image_path:
+        return '', 500
+
+    abs_path = BASE_DIR / image_path.lstrip('/')
+    if abs_path.exists():
+        return send_file(abs_path, mimetype='image/png')
+
+    return '', 404
+
+
+@app.route('/billing/whatsapp-invoice/<id>')
+def billing_whatsapp_invoice(id):
+    bills = read_json(BILLS_FILE)
+    bill = next((b for b in bills if b['id'] == id), None)
+    if not bill:
+        return '', 404
+
+    customer = next((c for c in read_json(CUSTOMERS_FILE) if c['id'] == bill.get('customer_id')), {})
+    bill_copy = dict(bill)
+    bill_copy['customer_name'] = customer.get('name', bill.get('customer_name', 'Customer'))
+    image_path = generate_invoice_whatsapp_image(bill_copy)
+    if not image_path:
+        return '', 500
+
+    abs_path = BASE_DIR / image_path.lstrip('/')
+    if abs_path.exists():
+        return send_file(abs_path, mimetype='image/png')
+
+    return '', 404
 
 
 @app.route('/cart/place', methods=['POST'])

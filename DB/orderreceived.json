@@ -1,75 +1,71 @@
 [
   {
-    "id": "68e9c0bc-faa0-4132-a96e-993d5896f683",
-    "customer_name": "xx",
-    "customer_mobile": "9818567683",
+    "id": "727a8118-46fc-44b5-8f79-5be665734940",
+    "customer_name": "surabhi",
+    "customer_mobile": "7042170712",
     "customer_address": "power house road",
     "items": [
       {
-        "product_id": "24150b28-621a-4341-b151-3b3714d247f3",
-        "product_name": "c",
-        "qty": 1,
-        "unit_price": 3.0,
-        "amount": 3.0
+        "product_id": "d73ad0d5-a105-45ee-a04f-8f63246447e5",
+        "product_name": "KIT A",
+        "qty": 1000,
+        "unit_price": 10.0,
+        "amount": 10000.0
       }
     ],
-    "total": 3.0,
-    "created_at": "2026-09-17T18:35:18.554836",
-    "customer_id": "4c1e980a-457c-4265-866c-fbdc17029372",
-    "orderid": "68e9c0bc-faa0-4132-a96e-993d5896f683",
-    "customerid": "4c1e980a-457c-4265-866c-fbdc17029372",
-    "bill_id": "7d4d73e5-3587-4560-b0ed-d9dead58bcf7",
-    "bill_created_at": "2026-09-17T18:35:28.269955"
+    "total": 10000.0,
+    "created_at": "2026-09-17T20:26:05.283852",
+    "customer_id": "d0141b99-213b-4543-9ad3-d58decaf2135",
+    "orderid": "727a8118-46fc-44b5-8f79-5be665734940",
+    "customerid": "d0141b99-213b-4543-9ad3-d58decaf2135",
+    "bill_id": "102cbd6b-7b45-47ef-ac16-02d0e5538ab3",
+    "bill_created_at": "2026-09-17T21:25:00.771197"
   },
   {
-    "id": "0ce56caa-acbb-400d-89fd-8204088951ae",
-    "customer_name": "test",
-    "customer_mobile": "7818567684",
+    "id": "ef1b5601-dbc5-4ac5-a506-844de3ffe1e3",
+    "customer_name": "suresh kr",
+    "customer_mobile": "9818567684",
     "customer_address": "power house road",
     "items": [
       {
-        "product_id": "24150b28-621a-4341-b151-3b3714d247f3",
-        "product_name": "c",
+        "product_id": "d73ad0d5-a105-45ee-a04f-8f63246447e5",
+        "product_name": "KIT A",
         "qty": 1,
-        "unit_price": 3.0,
-        "amount": 3.0
+        "unit_price": 10.0,
+        "amount": 10.0
       }
     ],
-    "total": 3.0,
-    "created_at": "2026-09-17T18:46:24.718210",
-    "customer_id": "560b818d-8368-49e6-9094-4efd804433bb",
-    "orderid": "0ce56caa-acbb-400d-89fd-8204088951ae",
-    "customerid": "560b818d-8368-49e6-9094-4efd804433bb",
-    "bill_id": "29ab1984-0cf8-444f-a2c5-dc9e86f232a9",
-    "bill_created_at": "2026-09-17T18:58:58.273658"
+    "total": 10.0,
+    "created_at": "2026-09-17T20:37:53.608951",
+    "customer_id": "7cf133f8-6093-4120-a848-ccb1cb1b2ec4",
+    "orderid": "ef1b5601-dbc5-4ac5-a506-844de3ffe1e3",
+    "customerid": "7cf133f8-6093-4120-a848-ccb1cb1b2ec4"
   },
   {
-    "id": "ec9e6771-35a8-435d-8378-4b6c65bfdbf3",
-    "customer_name": "xx",
-    "customer_mobile": "9818567683",
+    "id": "362e610d-8cf2-4893-9e86-723779732863",
+    "customer_name": "vishal kumar",
+    "customer_mobile": "9818567684",
     "customer_address": "power house road",
     "items": [
       {
-        "product_id": "24150b28-621a-4341-b151-3b3714d247f3",
-        "product_name": "c",
+        "product_id": "d73ad0d5-a105-45ee-a04f-8f63246447e5",
+        "product_name": "KIT A",
         "qty": 1,
-        "unit_price": 3.0,
-        "amount": 3.0
+        "unit_price": 10.0,
+        "amount": 10.0
       },
       {
-        "product_id": "16734740-62c7-4c08-918f-06831f896159",
-        "product_name": "d",
-        "qty": 1000,
-        "unit_price": 4.0,
-        "amount": 4000.0
+        "product_id": "ffb15540-9b40-4a12-9902-f9d7478d99e7",
+        "product_name": "KIT B",
+        "qty": 1,
+        "unit_price": 20.0,
+        "amount": 20.0
       }
     ],
-    "total": 4003.0,
-    "created_at": "2026-09-17T18:59:19.689851",
-    "customer_id": "4c1e980a-457c-4265-866c-fbdc17029372",
-    "orderid": "ec9e6771-35a8-435d-8378-4b6c65bfdbf3",
-    "customerid": "4c1e980a-457c-4265-866c-fbdc17029372",
-    "bill_id": "375e3087-d16d-42d9-8874-fe669b57b453",
-    "bill_created_at": "2026-09-17T18:59:26.739170"
+    "total": 30.0,
+    "created_at": "2026-09-17T20:45:42.352268",
+    "customer_id": "7cf133f8-6093-4120-a848-ccb1cb1b2ec4",
+    "orderid": "362e610d-8cf2-4893-9e86-723779732863",
+    "customerid": "7cf133f8-6093-4120-a848-ccb1cb1b2ec4"
   }
 ]

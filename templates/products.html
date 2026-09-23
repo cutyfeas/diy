@@ -18,7 +18,6 @@
 </section>
 
 <section class="card mt-3">
-  <h2>Active products</h2>
   <div class="grid">
     {% for p in products %}
       <div class="product-card {% if p.is_deleted %}deleted{% endif %}">

@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-  <!-- printable invoice view -->
   <div class="invoice">
     <div class="inv-header">
       <div class="logo-inv">
@@ -9,32 +8,44 @@
       </div>
       <div class="inv-title">INVOICE</div>
     </div>
+
     <div class="inv-meta text-right mb-3">
       <div><strong>DATE:</strong> {{ bill.date }}</div>
       <div><strong>INVOICE NO.:</strong> {{ bill.invoice_no }}</div>
     </div>
+
     <div class="bill-to">
-      <h3>BILL TO</h3>
       <div>{{ customer.name }}</div>
       <div>{{ customer.mobile_number }}</div>
       <div>{{ customer.address }}</div>
     </div>
 
     <table class="inv-table">
-      <thead><tr><th>SR. NO</th><th>PRODUCT / DESCRIPTION</th><th>QTY</th><th>UNIT PRICE (₹)</th><th>AMOUNT (₹)</th></tr></thead>
+      <thead>
+        <tr>
+          <th>SR. NO</th>
+          <th>PRODUCT</th>
+          <th>PRICE (₹)</th>
+          <th>QTY</th>
+          <th>TOTAL (₹)</th>
+        </tr>
+      </thead>
       <tbody>
-        {% for i, it in enumerate(items) %}
+        {% for it in items %}
         <tr>
           <td>{{ loop.index }}</td>
           <td>{{ it.product_name }}{% if it.description %} — {{ it.description }}{% endif %}</td>
-          <td>{{ it.qty }}</td>
           <td>₹{{ '%.2f'|format(it.unit_price) }}</td>
+          <td>{{ it.qty }}</td>
           <td>₹{{ '%.2f'|format(it.amount) }}</td>
         </tr>
         {% endfor %}
       </tbody>
       <tfoot>
-        <tr class="total-row"><td colspan="4">TOTAL</td><td>₹{{ '%.2f'|format(bill.total) }}</td></tr>
+        <tr class="total-row">
+          <td colspan="4">TOTAL</td>
+          <td>₹{{ '%.2f'|format(bill.total) }}</td>
+        </tr>
       </tfoot>
     </table>
 
@@ -46,9 +57,8 @@
       </ul>
     </div>
 
-    <div class="inv-actions">
-      <button class="btn" onclick="window.print()">Print</button>
+    <div class="inv-actions text-center mt-4">
+      <button class="btn btn-primary" onclick="window.print()">Print Bill</button>
     </div>
   </div>
-{% endif %}
 {% endblock %}

@@ -174,3 +174,119 @@ def test_orders_add_page_and_post(client):
     o = orders[-1]
     assert o['customer_id'] == cid
     assert isinstance(o['items'], list) and o['items'][0]['product_id'] == pid
+
+
+def test_orders_edit_updates_order(client):
+    import app as mod
+    client.post('/customers/add', data={'name': 'Fran', 'mobile_number': '4444444444', 'address': 'Old Address'}, follow_redirects=True)
+    client.post('/customers/add', data={'name': 'Grace', 'mobile_number': '3333333333', 'address': 'New Address'}, follow_redirects=True)
+    client.post('/products/add', data={'name': 'Lamp', 'price': '40.00'}, follow_redirects=True)
+    client.post('/products/add', data={'name': 'Frame', 'price': '15.00'}, follow_redirects=True)
+    customers = json.loads(mod.CUSTOMERS_FILE.read_text(encoding='utf-8'))
+    products = json.loads(mod.PRODUCTS_FILE.read_text(encoding='utf-8'))
+    cid1 = customers[0]['id']
+    cid2 = customers[1]['id']
+    pid1 = products[0]['id']
+    pid2 = products[1]['id']
+
+    resp = client.post('/orders/add', data={
+        'customer_id': cid1,
+        'item_product_0': pid1,
+        'item_qty_0': '2'
+    }, follow_redirects=True)
+    assert b'Order created' in resp.data
+    orders = json.loads(mod.ORDERS_FILE.read_text(encoding='utf-8'))
+    order_id = orders[-1]['id']
+
+    resp = client.get(f'/orders/edit/{order_id}')
+    assert resp.status_code == 200
+    assert b'Edit Order' in resp.data
+    assert f'value="{pid1}"'.encode() in resp.data
+
+    resp = client.post(f'/orders/edit/{order_id}', data={
+        'customer_id': cid2,
+        'item_product_0': pid2,
+        'item_qty_0': '3'
+    }, follow_redirects=True)
+    assert b'Order updated' in resp.data
+
+    orders = json.loads(mod.ORDERS_FILE.read_text(encoding='utf-8'))
+    updated = next(o for o in orders if o['id'] == order_id)
+    assert updated['customer_id'] == cid2
+    assert updated['customer_name'] == 'Grace'
+    assert updated['customer_mobile'] == '3333333333'
+    assert updated['items'][0]['product_id'] == pid2
+    assert updated['items'][0]['qty'] == 3
+    assert updated['total'] == 45.0
+
+
+def test_whatsapp_bill_image_route_generates_png(client):
+    import app as mod
+    client.post('/customers/add', data={'name': 'Hina', 'mobile_number': '1212121212', 'address': 'Addr'}, follow_redirects=True)
+    client.post('/products/add', data={'name': 'Canvas', 'price': '70.00'}, follow_redirects=True)
+    products = json.loads(mod.PRODUCTS_FILE.read_text(encoding='utf-8'))
+    pid = products[0]['id']
+    client.post('/cart/add', json={'product_id': pid, 'quantity': 2})
+    client.post('/cart/place', data={'name': 'Hina', 'mobile': '1212121212', 'address': 'Addr'}, follow_redirects=True)
+    orders = json.loads(mod.ORDERS_FILE.read_text(encoding='utf-8'))
+    oid = orders[-1]['id']
+
+    resp = client.get(f'/orders/whatsapp-image/{oid}')
+    assert resp.status_code == 200
+    assert resp.mimetype == 'image/png'
+    assert len(resp.data) > 1000
+
+
+def test_whatsapp_invoice_route_generates_png(client):
+    import app as mod
+    customer_data = {'name': 'Ivy', 'mobile_number': '1010101010', 'address': 'Addr'}
+    client.post('/customers/add', data=customer_data, follow_redirects=True)
+    client.post('/products/add', data={'name': 'Brush Set', 'price': '250.00'}, follow_redirects=True)
+    customers = json.loads(mod.CUSTOMERS_FILE.read_text(encoding='utf-8'))
+    products = json.loads(mod.PRODUCTS_FILE.read_text(encoding='utf-8'))
+    cid = customers[0]['id']
+    pid = products[0]['id']
+
+    bill = {
+        'id': str(mod.uuid.uuid4()),
+        'invoice_no': '010',
+        'date': mod.datetime.date.today().isoformat(),
+        'customer_id': cid,
+        'customer_name': 'Ivy',
+        'items': [{'product_id': pid, 'qty': 2, 'unit_price': 250.0, 'amount': 500.0, 'product_name': 'Brush Set'}],
+        'total': 500.0,
+        'notes': '',
+        'created_at': mod.now_iso(),
+    }
+    bills = json.loads(mod.BILLS_FILE.read_text(encoding='utf-8'))
+    bills.append(bill)
+    mod.write_json_atomic(mod.BILLS_FILE, bills)
+
+    resp = client.get(f'/billing/whatsapp-invoice/{bill["id"]}')
+    assert resp.status_code == 200
+    assert resp.mimetype == 'image/png'
+    assert len(resp.data) > 1000
+
+
+def test_orders_edit_keeps_original_product_visible(client):
+    import app as mod
+    client.post('/customers/add', data={'name': 'Hank', 'mobile_number': '2222222222', 'address': 'X'}, follow_redirects=True)
+    client.post('/products/add', data={'name': 'Deleted Product', 'price': '99.00'}, follow_redirects=True)
+    products = json.loads(mod.PRODUCTS_FILE.read_text(encoding='utf-8'))
+    customer = json.loads(mod.CUSTOMERS_FILE.read_text(encoding='utf-8'))[0]
+    product = products[0]
+    product['is_deleted'] = True
+    mod.write_json_atomic(mod.PRODUCTS_FILE, products)
+
+    client.post('/orders/add', data={
+        'customer_id': customer['id'],
+        'item_product_0': product['id'],
+        'item_qty_0': '1'
+    }, follow_redirects=True)
+    orders = json.loads(mod.ORDERS_FILE.read_text(encoding='utf-8'))
+    order_id = orders[-1]['id']
+
+    resp = client.get(f'/orders/edit/{order_id}')
+    assert resp.status_code == 200
+    assert f'value="{product["id"]}"'.encode() in resp.data
+    assert b'Deleted Product' in resp.data

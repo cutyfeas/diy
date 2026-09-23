@@ -1,11 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-3">
-  <div class="h4 mb-0">Billing / Invoices</div>
-</div>
+
 
 <section class="card">
-  <h2>All Bills</h2>
   <table class="responsive-table">
     <thead><tr><th>Invoice No</th><th>Date</th><th>Customer</th><th>Total (₹)</th><th>Actions</th></tr></thead>
     <tbody>
@@ -16,8 +13,19 @@
         <td>{{ b.customer_name }}</td>
         <td>₹{{ '%.2f'|format(b.total) }}</td>
         <td>
-          <a class="btn btn-sm btn-outline-primary" href="/invoice/{{ b.id }}">View</a>
-          <a class="btn btn-sm btn-outline-secondary" href="/billing/edit/{{ b.id }}">Edit</a>
+              <a class="btn btn-sm btn-outline-primary" href="/invoice/{{ b.id }}">View</a>
+{% if b.customer_mobile %}
+    {% set raw_mobile = b.customer_mobile|replace(' ', '')|replace('-', '') %}
+    {% set wa_mobile = raw_mobile if raw_mobile.startswith('+') or raw_mobile.startswith('91') else '91' ~ raw_mobile %}
+    {% set image_url = '/billing/whatsapp-invoice/' ~ b.id %}
+    {% set invoice_url = 'https://cutyfeas.pythonanywhere.com' ~ image_url %}
+    {% set wa_text = 'DIY HUE Studio\nPick • Paint • Create\n\nHello ' ~ b.customer_name ~ ',\n\nThank you for shopping with DIY HUE Studio!\nYour invoice is available here:\n' ~ invoice_url ~ '\n\n✨ Handmade with love, always ✨' %}
+    {% set wa_link = 'https://wa.me/' ~ wa_mobile ~ '?text=' ~ wa_text|urlencode %}
+    <button type="button" class="btn btn-sm btn-success whatsapp-invoice-btn" data-wa-link="{{ wa_link }}">WhatsApp Invoice</button>
+{% endif %}
+
+
+          
           <form action="/billing/delete/{{ b.id }}" method="post" style="display:inline-block">
             <button class="btn danger" onclick="return confirm('Delete bill?')">Delete</button>
           </form>
@@ -27,5 +35,17 @@
     </tbody>
   </table>
 </section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.whatsapp-invoice-btn').forEach(function (button) {
+      button.addEventListener('click', function () {
+        const waLink = button.getAttribute('data-wa-link');
+        if (!waLink) return;
+        window.open(waLink, '_blank', 'noopener,noreferrer');
+      });
+    });
+  });
+</script>
 
 {% endblock %}

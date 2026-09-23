@@ -18,12 +18,26 @@
           {% if o.get('bill_id') and o._bill %}
             <span class="badge badge-success">{{ o._bill.invoice_no }}</span>
           {% else %}
-            <form action="/orders/create_bill/{{ o.id }}" method="post" style="display:inline-block;margin-right:6px">
-              <button class="btn btn-sm btn-primary">Create Bill</button>
-            </form>
-            <form action="/orders/delete/{{ o.id }}" method="post" style="display:inline-block" onsubmit="return confirm('Delete order?')">
-              <button class="btn btn-sm btn-outline-danger">Delete</button>
-            </form>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+              <a class="btn btn-sm btn-outline-secondary" href="/orders/edit/{{ o.id }}">Edit</a>
+              <form action="/orders/delete/{{ o.id }}" method="post" style="display:inline-block" onsubmit="return confirm('Delete order?')">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+              
+              {% if o.customer_mobile %}
+                {% set raw_mobile = o.customer_mobile|replace(' ', '')|replace('-', '') %}
+                {% set wa_mobile = raw_mobile if raw_mobile.startswith('+') or raw_mobile.startswith('91') else '91' ~ raw_mobile %}
+                {% set image_url = '/orders/whatsapp-image/' ~ o.id %}
+                {% set invoice_url = 'https://cutyfeas.pythonanywhere.com' ~ image_url %}
+                {% set wa_text = 'DIY HUE Studio\nPick • Paint • Create\n\nHello ' ~ o.customer_name ~ ',\nPlease confirm the bill amount of **₹%.2f** for your order.\n\nInvoice image: %s\n\n✨ Thank you for choosing DIY HUE Studio — handmade with love always! ✨'|format(o.total, invoice_url) %}
+                {% set wa_link = 'https://wa.me/' ~ wa_mobile ~ '?text=' ~ wa_text|urlencode %}
+                <button type="button" class="btn btn-sm btn-success whatsapp-bill-btn" data-wa-link="{{ wa_link }}">WhatsApp Bill</button>
+              {% endif %}
+
+              <form action="/orders/create_bill/{{ o.id }}" method="post" style="display:inline-block">
+                <button class="btn btn-sm btn-primary">Bill Paid</button>
+              </form>
+            </div>
           {% endif %}
         </td>
       </tr>
@@ -34,4 +48,16 @@
     </tbody>
   </table>
 </section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.whatsapp-bill-btn').forEach(function (button) {
+      button.addEventListener('click', function () {
+        const waLink = button.getAttribute('data-wa-link');
+        if (!waLink) return;
+        window.open(waLink, '_blank', 'noopener,noreferrer');
+      });
+    });
+  });
+</script>
 {% endblock %}

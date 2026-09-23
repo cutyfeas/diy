@@ -1,38 +1,20 @@
 [
   {
-    "id": "dff50125-9710-4195-9345-1494d1b9bf95",
-    "name": "a",
-    "price": 1.0,
-    "image": "/static/uploads/thumb_f45b37478bcf48f198634a3d1debe067_WhatsApp_Image_2026-09-17_at_5.24.35_PM.jpeg",
-    "is_deleted": true,
-    "created_at": "2026-09-17T14:43:13.164642",
-    "updated_at": "2026-09-17T18:26:50.533751"
-  },
-  {
-    "id": "a995f29e-be60-4957-b3cf-96b12bd45308",
-    "name": "b",
-    "price": 2.0,
-    "image": "/static/uploads/thumb_fd752dde83674324a1c6e0e81898d363_WhatsApp_Image_2026-09-17_at_5.24.35_PM.jpeg",
-    "is_deleted": true,
-    "created_at": "2026-09-17T14:57:31.716973",
-    "updated_at": "2026-09-17T18:26:52.316422"
-  },
-  {
-    "id": "24150b28-621a-4341-b151-3b3714d247f3",
-    "name": "c",
-    "price": 3.0,
-    "image": "/static/uploads/thumb_75f28621348d4d549fc1883d77cf277a_mona-pan.jpg",
+    "id": "d73ad0d5-a105-45ee-a04f-8f63246447e5",
+    "name": "KIT A",
+    "price": 10.0,
+    "image": "/static/uploads/thumb_2a9a612ac55942eb9d71dd73fad2c8e3_PIC.jpeg",
     "is_deleted": false,
-    "created_at": "2026-09-17T14:57:41.147522",
-    "updated_at": "2026-09-17T15:06:56.798756"
+    "created_at": "2026-09-17T19:39:58.727896",
+    "updated_at": "2026-09-17T20:22:15.862661"
   },
   {
-    "id": "16734740-62c7-4c08-918f-06831f896159",
-    "name": "d",
-    "price": 4.0,
-    "image": "/static/uploads/thumb_359e8beb416448d498b22e8ce774c676_bill.png",
+    "id": "ffb15540-9b40-4a12-9902-f9d7478d99e7",
+    "name": "KIT B",
+    "price": 20.0,
+    "image": "/static/uploads/thumb_0cca4eab7bfb48df8c5cff57745276db_Screenshot_2026-09-18_010115.png",
     "is_deleted": false,
-    "created_at": "2026-09-17T15:41:38.928287",
-    "updated_at": "2026-09-17T15:41:38.928304"
+    "created_at": "2026-09-17T19:40:18.170879",
+    "updated_at": "2026-09-17T20:22:14.937305"
   }
 ]
